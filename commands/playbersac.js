@@ -1,8 +1,8 @@
-const { SlashCommandBuilder } = require('discord.js');
+const { SlashCommandBuilder, EmbedBuilder } = require('discord.js');
 const { entersState, joinVoiceChannel, createAudioPlayer, createAudioResource, AudioPlayerStatus, VoiceConnectionStatus } = require('@discordjs/voice');
 const { createReadStream } = require('fs');
 const path = require('path');
-
+const { sendDailyMessage } = require('../index.js')
 
 module.exports = {
     data: new SlashCommandBuilder()
@@ -13,7 +13,7 @@ module.exports = {
         const vc = member.voice.channel
 
         if(!vc) {
-            return interaction.reply({ content: 'Tu dois être dans un salon vocal pour que je puisse te rejoindre!', ephemeral: true });
+            return interaction.reply({ content: 'Tu est nonchalant !, rejoint un salon vocal d\'abord !', ephemeral: true });
         }
 
         const connection = joinVoiceChannel({
@@ -48,6 +48,6 @@ module.exports = {
             connection.destroy();
         });
 
-        return interaction.reply({ content: 'Je suis dans le salon vocal et j\'ai commencé à jouer le son !', ephemeral: true });
+        return interaction.reply({ content: 'Allez on se dépèche !', ephemeral: true });
     },
 };

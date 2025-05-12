@@ -1,6 +1,7 @@
 require('dotenv').config();
 const fs = require('fs');
 const path = require('path');
+const cron = require('node-cron')
 const { REST, Routes } = require('discord.js');
 const {
     joinVoiceChannel,
@@ -11,14 +12,15 @@ const {
     VoiceConnectionStatus,
 } = require('@discordjs/voice');
 
-const { 
-    Client, 
-    GatewayIntentBits, 
-    Partials, 
+const {
+    Client,
+    GatewayIntentBits,
+    Partials,
     Collection,
     ActivityType,
     PresenceUpdateStatus,
-    Events
+    Events,
+    EmbedBuilder
 } = require('discord.js');
 
 const deployCommands = async () => {
@@ -175,6 +177,35 @@ client.on(Events.VoiceStateUpdate, async (oldState, newState) => {
             connection.destroy();
         });
     }
+});
+
+imageLinks = [
+    "https://i.imgur.com/rLZDaHo.png",
+    "https://i.imgur.com/HBOejro_d.png",
+    "https://i.imgur.com/sULofJ9_d.png",
+    "https://i.imgur.com/rnLEvMa.gif",
+    "https://i.imgur.com/TcPg7yA.gif"
+]
+
+async function sendDailyMessage() {
+    const Day = new EmbedBuilder()
+        .setTitle("Bonjour !")
+        .setImage(imageLinks[Math.floor(Math.random() * imageLinks.length)])
+        .setColor([139, 30, 63])
+    try {
+        const channel = await client.channels.fetch(process.env.CH_ID);
+        if (channel) {
+            channel.send({ embeds: [Day] });
+        } else {
+            console.log('Canal non trouvé');
+        }
+    } catch (error) {
+        console.error('Erreur lors de la récupération du canal :', error);
+    }
+}
+
+cron.schedule('0 10 * * *', () => {
+    sendDailyMessage();
 });
 
 client.login(process.env.BOT_TOKEN);
