@@ -2,18 +2,26 @@ const { SlashCommandBuilder, EmbedBuilder } = require('discord.js');
 const { entersState, joinVoiceChannel, createAudioPlayer, createAudioResource, AudioPlayerStatus, VoiceConnectionStatus } = require('@discordjs/voice');
 const { createReadStream } = require('fs');
 const path = require('path');
-const { sendDailyMessage } = require('../index.js')
 
 module.exports = {
     data: new SlashCommandBuilder()
-        .setName('playbersac')
-        .setDescription('On se dépèche ?'),
+        .setName('play')
+        .setDescription('SoundBoard Pro')
+        .addStringOption(option =>
+            option.setName("son")
+            .setDescription("Choisi le son")
+            .addChoices(
+                {name : "L'attaque des tableaux", value :"groutch.mp3"},
+                {name : "Bersac", value:"bersac.mp3"}
+            )
+            .setRequired(true)
+        ),
     async execute(interaction) {
         const member = interaction.member
         const vc = member.voice.channel
 
         if(!vc) {
-            return interaction.reply({ content: 'Tu est nonchalant !, rejoint un salon vocal d\'abord !', ephemeral: true });
+            return interaction.reply({ content: 'Tu est nonchalant, rejoint un salon vocal d\'abord !', ephemeral: true });
         }
 
         const connection = joinVoiceChannel({
@@ -30,9 +38,9 @@ module.exports = {
             connection.destroy();
             return interaction.reply({ content: 'Je n\'ai pas pu me connecter au salon vocal.', ephemeral: true });
         }
-
+        const son = interaction.options.getString('son')
         const player = createAudioPlayer();
-        const audioPath = path.join(__dirname, '../bersac.mp3');
+        const audioPath = path.join(__dirname, `../music/${son}`);
         const resource = createAudioResource(createReadStream(audioPath));
 
 

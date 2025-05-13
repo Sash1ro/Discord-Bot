@@ -163,7 +163,7 @@ client.on(Events.VoiceStateUpdate, async (oldState, newState) => {
         }
 
         const player = createAudioPlayer();
-        const audioPath = path.join(__dirname, 'bersac.mp3');
+        const audioPath = path.join(__dirname, './music/bersac.mp3');
         const resource = createAudioResource(fs.createReadStream(audioPath));
         player.play(resource);
         connection.subscribe(player);
@@ -190,6 +190,7 @@ imageLinks = [
 async function sendDailyMessage() {
     const Day = new EmbedBuilder()
         .setTitle("Bonjour !")
+        .setDescription("@everyone")
         .setImage(imageLinks[Math.floor(Math.random() * imageLinks.length)])
         .setColor([139, 30, 63])
     try {
@@ -203,9 +204,9 @@ async function sendDailyMessage() {
         console.error('Erreur lors de la récupération du canal :', error);
     }
 }
-
-cron.schedule('0 10 * * *', () => {
+cron.schedule('0 8 * * *', () => {
     sendDailyMessage();
 });
+
 
 client.login(process.env.BOT_TOKEN);
