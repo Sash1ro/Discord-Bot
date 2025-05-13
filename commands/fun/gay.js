@@ -6,8 +6,8 @@ module.exports = {
         .setDescription('LGBTQIA+ édition premium python cream deluxe'),
     async execute(interaction) {
         const gayEmbed = new EmbedBuilder()
-            .setAuthor( { name : interaction.user.tag, iconURL: interaction.user.avatarURL() } )
-            .setImage("https://i.imgur.com/TcPg7yA.gif")
+            .setTitle("Pas besoin de dire qui...")
+            .setImage("https://i.imgur.com/TechQcg.jpeg")
             .setColor([139, 30, 63])
         await interaction.reply({ embeds: [gayEmbed] });
     },

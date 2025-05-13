@@ -23,74 +23,86 @@ const {
     EmbedBuilder
 } = require('discord.js');
 
-const deployCommands = async () => {
-    try {
-        const commands = [];
-
-        const commandFiles = fs.readdirSync(path.join(__dirname, 'commands')).filter(file => file.endsWith('.js'));
-
-        for (const file of commandFiles) {
-            const command = require(`./commands/${file}`);
-            if ('data' in command && 'execute' in command) {
-                commands.push(command.data.toJSON());
-            } else {
-                console.log(`WARNING: The command at ${file} is missing a required 'data' or 'execute' property.`);
-            }
-        }
-
-        const rest = new REST().setToken(process.env.BOT_TOKEN);
-
-        console.log(`Started refreshing application slash commands globally.`);
-
-        const data = await rest.put(
-            Routes.applicationCommands(process.env.CLIENT_ID),
-            { body: commands },
-        );
-
-        console.log('Successfully reloaded all commands!');
-    } catch (error) {
-        console.error('Error deploying commands:', error);
-    }
-};
-
 const client = new Client({
     intents: [
         GatewayIntentBits.Guilds,
         GatewayIntentBits.GuildMessages,
         GatewayIntentBits.MessageContent,
         GatewayIntentBits.GuildMembers,
-        GatewayIntentBits.GuildVoiceStates // nécessaire pour écouter les salons vocaux
+        GatewayIntentBits.GuildVoiceStates
     ],
     partials: [
         Partials.Channel,
         Partials.Message,
         Partials.User,
-        Partials.GuildMember
+        Partials.GuildMember,
     ]
 });
 
-client.commands = new Collection();
+const deployCommands = async () => {
+    try {
+        const commands = []
+        const foldersPath = path.join(__dirname, 'commands');
+        const commandFolders = fs.readdirSync(foldersPath);
 
-const commandsPath = path.join(__dirname, 'commands');
-const commandFiles = fs.readdirSync(commandsPath).filter(file => file.endsWith('.js'));
+        for (const folder of commandFolders) {
+            const commandsPath = path.join(foldersPath, folder);
+            const commandFiles = fs.readdirSync(commandsPath).filter(file => file.endsWith('.js'));
+            for (const file of commandFiles) {
+                const filePath = path.join(commandsPath, file);
+                const command = require(filePath);
 
-for (const file of commandFiles) {
-    const filePath = path.join(commandsPath, file);
-    const command = require(filePath);
+                if ('data' in command && 'execute' in command) {
+                    commands.push(command.data.toJSON());
+                } else {
+                    console.log(`[WARNING] The command at ${filePath} is missing a required "data" or "execute" property.`);
+                }
+            }
+        }
 
-    if ('data' in command && 'execute' in command) {
-        client.commands.set(command.data.name, command);
-    } else {
-        console.log(`The Command ${filePath} is missing a required "data" or "execute" property.`);
+        const rest = new REST().setToken(process.env.BOT_TOKEN);
+
+        console.log(`Actualisation des commandes en cours`);
+
+        const data = await rest.put(
+            Routes.applicationCommands(process.env.CLIENT_ID),
+            { body: commands },
+        );
+
+        console.log(`${data.length} commandes actualisées avec succès !`);
+
+    } catch (error) {
+        console.error('Erreur dans le déploiement des commandes :', error);
+    }
+};
+
+client.commands = new Collection()
+
+const foldersPath = path.join(__dirname, 'commands');
+const commandFolders = fs.readdirSync(foldersPath);
+
+for (const folder of commandFolders) {
+    const commandsPath = path.join(foldersPath, folder);
+    const commandFiles = fs.readdirSync(commandsPath).filter(file => file.endsWith('.js'));
+    for (const file of commandFiles) {
+        const filePath = path.join(commandsPath, file);
+        const command = require(filePath);
+
+        if ('data' in command && 'execute' in command) {
+            client.commands.set(command.data.name, command);
+        } else {
+            console.log(`[WARNING] The command at ${filePath} is missing a required "data" or "execute" property.`);
+        }
     }
 }
 
+
 client.once(Events.ClientReady, async () => {
-    console.log(`Ready! Logged in as ${client.user.tag}`);
+    console.log(`${client.user.tag} connecté !`);
 
     // Deploy commands
     await deployCommands();
-    console.log(`Commands deployed globally.`);
+    console.log(`Commandes déployées globalement`);
 
     const statusType = process.env.BOT_STATUS || 'online';
     const activityType = process.env.ACTIVITY_TYPE || 'PLAYING';
@@ -119,26 +131,45 @@ client.once(Events.ClientReady, async () => {
         }]
     });
 
-    console.log(`Bot status set to: ${statusType}`);
-    console.log(`Activity set to: ${activityType} ${activityName}`);
+    console.log(`*Status : ${statusType}`);
+    console.log(`*Activité : ${activityType} ${activityName}`);
 });
 
 client.on(Events.InteractionCreate, async interaction => {
-    if (!interaction.isChatInputCommand()) return;
-    const command = client.commands.get(interaction.commandName);
+    const intError = "Erreur dans l'execution de cette commande !"
+    if (interaction.isChatInputCommand()) {
+        const command = client.commands.get(interaction.commandName);
 
-    if (!command) return;
+        if (!command) return;
 
-    try {
-        await command.execute(interaction);
-    } catch (error) {
-        console.error(error);
-        if (interaction.replied || interaction.deferred) {
-            await interaction.followUp({ content: 'There was an error while executing this command!', ephemeral: true });
-        } else {
-            await interaction.reply({ content: 'There was an error while executing this command!', ephemeral: true });
+        try {
+            await command.execute(interaction);
+        } catch (error) {
+            console.error(error);
+            if (interaction.replied || interaction.deferred) {
+                await interaction.followUp({ content: intError, ephemeral: true });
+            } else {
+                await interaction.reply({ content: intError, ephemeral: true });
+            }
         }
-    }
+    } else if (interaction.isContextMenuCommand()) {
+        const command = client.commands.get(interaction.commandName);
+
+        if (!command) return;
+
+        try {
+            await command.execute(interaction);
+        } catch (error) {
+            console.error(error);
+            if (interaction.replied || interaction.deferred) {
+                await interaction.followUp({ content: intError, ephemeral: true });
+            } else {
+                await interaction.reply({ content: intError, ephemeral: true });
+            }
+        }
+
+    }else return;
+
 
 });
 
@@ -208,5 +239,16 @@ cron.schedule('0 8 * * *', () => {
     sendDailyMessage();
 });
 
+client.on('messageCreate', async (message) => {
+    if (message.author.id === process.env.TARGET_ID || message.author.id === process.env.TARGET2_ID) {
+        try {
+            await message.react("🇬")
+            await message.react("🇦")
+            await message.react("🇾");
+        } catch (error) {
+            console.error('Erreur lors de l\'ajout de la réaction:', error);
+        }
+    }
+});
 
 client.login(process.env.BOT_TOKEN);

@@ -1,4 +1,4 @@
-const { InteractionContextType, PermissionFlagsBits, SlashCommandBuilder, EmbedBuilder, userMention } = require('discord.js');
+const { InteractionContextType, PermissionFlagsBits, SlashCommandBuilder, EmbedBuilder, userMention, ApplicationCommandType } = require('discord.js');
 
 module.exports = {
     data: new SlashCommandBuilder()

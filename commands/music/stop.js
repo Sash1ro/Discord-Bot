@@ -1,7 +1,5 @@
-const { SlashCommandBuilder, EmbedBuilder } = require('discord.js');
-const { entersState, joinVoiceChannel, createAudioPlayer, createAudioResource, AudioPlayerStatus, VoiceConnectionStatus } = require('@discordjs/voice');
-const { createReadStream } = require('fs');
-const path = require('path');
+const { SlashCommandBuilder } = require('discord.js');
+const { joinVoiceChannel } = require('@discordjs/voice');
 
 module.exports = {
     data: new SlashCommandBuilder()
@@ -11,8 +9,15 @@ module.exports = {
         const member = interaction.member
         const vc = member.voice.channel
 
+        const bot = interaction.guild.members.cache.get(interaction.client.user.id)
+        const bot_vc = bot.voice.channel
+
         if(!vc) {
             return interaction.reply({ content: 'Tu est nonchalant, rejoint un salon vocal d\'abord !', ephemeral: true });
+        }
+
+        if(!bot_vc) {
+            return interaction.reply({ content: 'Je ne suis pas dans un salon vocal !', ephemeral: true });
         }
 
         const connection = joinVoiceChannel({
@@ -30,6 +35,6 @@ module.exports = {
             return interaction.reply({ content: "Erreur inconnue !", ephemeral: true });
         } 
         
-        return interaction.reply({ content: 'Allez on se dépèche !', ephemeral: true });
+        return interaction.reply({ content: `SoundBoard arrêtée !`, ephemeral: true });
     },
 };

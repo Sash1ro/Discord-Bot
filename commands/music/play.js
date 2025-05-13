@@ -9,18 +9,18 @@ module.exports = {
         .setDescription('SoundBoard Pro')
         .addStringOption(option =>
             option.setName("son")
-            .setDescription("Choisi le son")
-            .addChoices(
-                {name : "L'attaque des tableaux", value :"groutch.mp3"},
-                {name : "Bersac", value:"bersac.mp3"}
-            )
-            .setRequired(true)
+                .setDescription("Choisi le son")
+                .addChoices(
+                    { name: "L'attaque des tableaux", value: "groutch.mp3" },
+                    { name: "Bersac", value: "bersac.mp3" }
+                )
+                .setRequired(true)
         ),
     async execute(interaction) {
         const member = interaction.member
         const vc = member.voice.channel
 
-        if(!vc) {
+        if (!vc) {
             return interaction.reply({ content: 'Tu est nonchalant, rejoint un salon vocal d\'abord !', ephemeral: true });
         }
 
@@ -56,6 +56,11 @@ module.exports = {
             connection.destroy();
         });
 
-        return interaction.reply({ content: 'Allez on se dépèche !', ephemeral: true });
+        const playEmbed = new EmbedBuilder()
+            .setColor([139, 30, 63])
+            .setDescription(`${son} lancée !`)
+            .setImage("https://i.imgur.com/TcPg7yA.gif")
+
+        return interaction.reply({ embeds: [playEmbed] });
     },
 };
