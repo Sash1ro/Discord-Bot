@@ -4,6 +4,7 @@ module.exports = {
     data: new SlashCommandBuilder()
         .setName('kiss')
         .setDescription('Embrasse qlq !')
+        .setContexts(2,0,1)
         .addUserOption(option => 
             option.setName('user')
             .setDescription("L'utilisateur à embrasser")

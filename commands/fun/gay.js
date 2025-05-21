@@ -3,6 +3,7 @@ const { SlashCommandBuilder, EmbedBuilder } = require('discord.js');
 module.exports = {
     data: new SlashCommandBuilder()
         .setName('gay')
+        .setContexts(2,0,1)
         .setDescription('LGBTQIA+ édition premium python cream deluxe'),
     async execute(interaction) {
         const gayEmbed = new EmbedBuilder()

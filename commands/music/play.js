@@ -40,7 +40,7 @@ module.exports = {
         }
         const son = interaction.options.getString('son')
         const player = createAudioPlayer();
-        const audioPath = path.join(__dirname, `../music/${son}`);
+        const audioPath = path.join(__dirname, `../../music/${son}`);
         const resource = createAudioResource(createReadStream(audioPath));
 
 

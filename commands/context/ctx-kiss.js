@@ -3,6 +3,7 @@ const {ContextMenuCommandBuilder, EmbedBuilder, userMention, ApplicationCommandT
 module.exports = {
     data: new ContextMenuCommandBuilder()
         .setName('kiss')
+        .setContexts(2,0,1)
         .setType(ApplicationCommandType.User),
     async execute(interaction) {
 
